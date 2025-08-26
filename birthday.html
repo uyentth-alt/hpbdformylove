@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Birthday</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at center, #000010, #000000);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Hiệu ứng chữ rơi */
+    .falling-text {
+      position: absolute;
+      top: -150px;
+      font-family: "Times New Roman", serif;
+      font-size: 50px;
+      color: white;
+      text-shadow: 0 0 10px rgba(255,255,255,0.9),
+                   0 0 20px rgba(255,0,150,0.8);
+      animation: fall linear forwards;
+      white-space: nowrap;
+    }
+
+    /* Tim rơi */
+    .falling-heart {
+      position: absolute;
+      top: -40px;
+      font-size: 28px;
+      color: red;
+      text-shadow: 0 0 8px rgba(255,0,0,0.7);
+      animation: fall linear forwards;
+    }
+
+    /* Hiệu ứng rơi chung */
+    @keyframes fall {
+      0% { transform: translateY(-100px); opacity: 1; }
+      100% { transform: translateY(110vh); opacity: 0; }
+    }
+
+    /* Hiệu ứng lấp lánh nền */
+    .sparkle {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      opacity: 0.8;
+      animation: sparkle 2s infinite ease-in-out;
+    }
+
+    .sparkle.blue {
+      background: cyan;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { transform: scale(0.5); opacity: 0.3; }
+      50% { transform: scale(1.5); opacity: 1; }
+    }
+
+    /* Sao băng rơi từ trên xuống */
+    .shooting-star {
+      position: absolute;
+      width: 3px;
+      height: 120px;
+      background: linear-gradient(180deg, white, cyan, transparent);
+      border-radius: 50%;
+      animation: shooting 2s linear forwards;
+      opacity: 0.9;
+    }
+
+    @keyframes shooting {
+      0%   { transform: translate(0,0); opacity: 1; }
+      100% { transform: translate(0,600px); opacity: 0; }
+    }
+
+    /* Hiệu ứng nổ */
+    .explosion {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: explode 1.2s ease-out forwards;
+    }
+
+    @keyframes explode {
+      from { transform: translate(0,0); opacity: 1; }
+      to   { transform: translate(var(--x), var(--y)); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Nhạc nền -->
+  <audio autoplay loop>
+    <source src="chi-can-co-nhau.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const TEXTS = [
+      "Happy Birthday", "Chúc mừng sinh nhật", "24/8",
+      "My Love", "Let's go together", "Happy",
+      "Success", "Hạnh phúc", "Cherish"
+    ];
+
+    function createFallingItem(content, isHeart = false) {
+      const el = document.createElement("div");
+      el.className = isHeart ? "falling-heart" : "falling-text";
+      el.textContent = content;
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.animationDuration = (5 + Math.random() * 3) + "s";
+      document.body.appendChild(el);
+      el.addEventListener("animationend", () => el.remove());
+    }
+
+    // Chữ rơi
+    setInterval(() => {
+      const text = TEXTS[Math.floor(Math.random() * TEXTS.length)];
+      createFallingItem(text);
+    }, 250);
+
+    // Tim ❤ rơi
+    setInterval(() => {
+      createFallingItem("❤", true);
+    }, 200);
+
+    // Lấp lánh ánh sao
+    function createSparkle() {
+      const s = document.createElement("div");
+      s.className = "sparkle";
+      if (Math.random() > 0.7) s.classList.add("blue"); // thêm màu xanh dương
+      const size = Math.random() * 4 + 2;
+      s.style.width = size + "px";
+      s.style.height = size + "px";
+      s.style.left = Math.random() * 100 + "vw";
+      s.style.top = Math.random() * 100 + "vh";
+      s.style.animationDuration = (1 + Math.random() * 3) + "s";
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 5000);
+    }
+    setInterval(createSparkle, 80);
+
+    // Sao băng rơi từ trên xuống
+    function createShootingStar() {
+      const star = document.createElement("div");
+      star.className = "shooting-star";
+      star.style.left = Math.random() * 100 + "vw";  // vị trí ngang ngẫu nhiên
+      star.style.top = "-100px";                     // bắt đầu từ trên
+      document.body.appendChild(star);
+
+      setTimeout(() => {
+        const rect = star.getBoundingClientRect();
+        explode(rect.left, rect.top + 100); // nổ ngay dưới đuôi sao băng
+        star.remove();
+      }, 1800);
+    }
+
+    // Hiệu ứng nổ
+    function explode(x, y) {
+      const particles = 14;
+      for (let i = 0; i < particles; i++) {
+        const part = document.createElement("div");
+        part.className = "explosion";
+        part.style.left = x + "px";
+        part.style.top = y + "px";
+
+        // chỉ bắn xuống (120° đến 240°)
+        const angle = Math.PI + (Math.random() - 0.5) * Math.PI / 1.5;
+        const distance = 60 + Math.random() * 80;
+
+        part.style.setProperty("--x", Math.cos(angle) * distance + "px");
+        part.style.setProperty("--y", Math.sin(angle) * distance + "px");
+
+        document.body.appendChild(part);
+        setTimeout(() => part.remove(), 1200);
+      }
+    }
+
+    // Tạo nhiều sao băng
+    setInterval(createShootingStar, 2500);
+  </script>
+</body>
+</html>
